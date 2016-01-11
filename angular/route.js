@@ -9,5 +9,9 @@
                 templateUrl: 'public/views/home/home.html',
                 controller: 'HomeController as vm'
             })
+            .when('/fail', {
+                templateUrl: 'public/views/fail/fail.html',
+                controller: 'FailController as vm'
+            })
     }
 }());

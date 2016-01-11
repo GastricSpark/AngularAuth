@@ -6,9 +6,9 @@
         .module('app.factories')
         .factory('authInterceptor', authInterceptor);
 
-    authInterceptor.$inject = ['API', 'auth'];
+    authInterceptor.$inject = ['API', 'auth', '$window'];
 
-    function authInterceptor(API, auth){
+    function authInterceptor(API, auth, $window){
         return {
             // automatically attach Authorization header
             request: function(config) {
@@ -29,6 +29,13 @@
                 }
 
                 return res;
+            },
+
+            responseError: function(rejection){
+                if(rejection.status === 401){
+                    console.log('Response Error 401', rejection);
+                    $window.location.href = '#/fail';
+                }
             }
         }
     }

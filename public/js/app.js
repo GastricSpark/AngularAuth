@@ -30,6 +30,10 @@
                 templateUrl: 'public/views/home/home.html',
                 controller: 'HomeController as vm'
             })
+            .when('/fail', {
+                templateUrl: 'public/views/fail/fail.html',
+                controller: 'FailController as vm'
+            })
     }
 }());
 /**
@@ -61,9 +65,9 @@
         .module('app.factories')
         .factory('authInterceptor', authInterceptor);
 
-    authInterceptor.$inject = ['API', 'auth'];
+    authInterceptor.$inject = ['API', 'auth', '$window'];
 
-    function authInterceptor(API, auth){
+    function authInterceptor(API, auth, $window){
         return {
             // automatically attach Authorization header
             request: function(config) {
@@ -84,6 +88,13 @@
                 }
 
                 return res;
+            },
+
+            responseError: function(rejection){
+                if(rejection.status === 401){
+                    console.log('Response Error 401', rejection);
+                    $window.location.href = '#/fail';
+                }
             }
         }
     }
@@ -169,6 +180,21 @@
         };
     }
 }());
+/**
+ * Created by HWhewell on 11/01/2016.
+ */
+(function(){
+    angular
+        .module('app.controllers')
+        .controller('FailController', failController);
+
+    function failController(){
+        var vm = this;
+
+    }
+}());
+
+
 (function(){
     angular
         .module('app.controllers')
