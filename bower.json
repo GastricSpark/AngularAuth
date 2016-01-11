@@ -1,0 +1,24 @@
+{
+  "name": "angular-ui",
+  "description": "",
+  "main": "index.js",
+  "authors": [
+    "Harry Whewell <harry.whewell@myfuturesbright.co.uk>"
+  ],
+  "license": "ISC",
+  "moduleType": [
+    "node"
+  ],
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "~3.3.6",
+    "angular-bootstrap": "~0.14.3"
+  }
+}
