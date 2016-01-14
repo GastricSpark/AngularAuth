@@ -16,14 +16,15 @@
             if(token){
                 console.log('JWT:', token);
             }
-            vm.message = res.data.message;
+            vm.success = res.data.success;
         }
 
         vm.login = function(){
-            user.login(vm.username, vm.password)
+            user.login(vm.email, vm.password)
                 .then(handleRequest, handleRequest);
             $location.path('/dashboard');
 
         };
+
     }
 }());

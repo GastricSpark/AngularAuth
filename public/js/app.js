@@ -65,21 +65,27 @@
  */
 (function(){
     angular
-        .module('app.config')
-        .config(authConfig);
+        .module('app.constants')
+        .constant('API', 'http://localhost:8080/api');
 
-    function authConfig($httpProvider){
-        $httpProvider.interceptors.push('authInterceptor');
-    }
 }());
 /**
  * Created by HWhewell on 11/01/2016.
  */
 (function(){
     angular
-        .module('app.constants')
-        .constant('API', 'http://localhost:8080/api');
+        .module('app.config')
+        .config(authConfig);
 
+
+    function authConfig($httpProvider){
+        $httpProvider.defaults.headers.common = {};
+        $httpProvider.defaults.headers.post = {};
+        $httpProvider.defaults.headers.put = {};
+        $httpProvider.defaults.headers.patch = {};
+
+        $httpProvider.interceptors.push('authInterceptor');
+    }
 }());
 /**
  * Created by HWhewell on 11/01/2016.
@@ -187,7 +193,7 @@
 
 
         vm.register = function(name, email, password, role){
-            return $http.post(API +'/users',{
+            return $http.post(API +'/user/register',{
                 name: name,
                 email: email,
                 password: password,
@@ -258,15 +264,16 @@
             if(token){
                 console.log('JWT:', token);
             }
-            vm.message = res.data.message;
+            vm.success = res.data.success;
         }
 
         vm.login = function(){
-            user.login(vm.username, vm.password)
+            user.login(vm.email, vm.password)
                 .then(handleRequest, handleRequest);
             $location.path('/dashboard');
 
         };
+
     }
 }());
 /**

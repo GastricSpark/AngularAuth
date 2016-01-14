@@ -13,7 +13,7 @@
 
 
         vm.register = function(name, email, password, role){
-            return $http.post(API +'/users',{
+            return $http.post(API +'/user/register',{
                 name: name,
                 email: email,
                 password: password,
