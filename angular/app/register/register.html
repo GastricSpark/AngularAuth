@@ -1,0 +1,43 @@
+<br>
+<div class="container">
+    <div class="row ">
+        <div class="col-md-4 col-md-offset-4">
+            <div class="panel panel-primary ">
+                <div class="panel-heading">
+                    <div>
+                        <center><h3>Register</h3></center>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <form accept-charset="utf-8" role="form" novalidate>
+                        <fieldset class="form-group">
+                            <label for="name">Name</label>
+                            <input class="form-control" type="text" ng-model="vm.name" id="name"
+                                   placeholder="Enter name">
+                        </fieldset>
+
+                        <fieldset class="form-group">
+                            <label for="email">Email</label>
+                            <input class="form-control" type="text" ng-model="vm.email" id="email"
+                                   placeholder="Enter email">
+                        </fieldset>
+                        <fieldset class="form-group">
+                            <label for="password">Password</label>
+                            <input class="form-control" type="password" ng-model="vm.password" id="password"
+                                   placeholder="Enter password">
+                        </fieldset>
+                        <fieldset class="form-group">
+                        <label for="Role">Role</label>
+                        <select class="form-control" ng-model="vm.role" id="role">
+                            <option value="user">User</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </fieldset>
+                        <button class="btn btn-primary btn-block"  ng-click="vm.register()">Register</button>
+                    </form>
+                </div>
+            </div>
+            <p>{{vm.message}}</p>
+        </div>
+    </div>
+</div>

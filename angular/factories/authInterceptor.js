@@ -6,9 +6,9 @@
         .module('app.factories')
         .factory('authInterceptor', authInterceptor);
 
-    authInterceptor.$inject = ['API', 'auth', '$window'];
+    authInterceptor.$inject = ['API', 'auth', '$location'];
 
-    function authInterceptor(API, auth, $window){
+    function authInterceptor(API, auth, $location){
         return {
             // automatically attach Authorization header
             request: function(config) {
@@ -27,15 +27,15 @@
                 if(res.config.url.indexOf(API) === 0 && res.data.token) {
                     auth.saveToken(res.data.token);
                 }
-
                 return res;
             },
 
             responseError: function(rejection){
-                if(rejection.status === 401){
+                if(rejection.status === 401 || rejection.status === 403){
                     console.log('Response Error 401', rejection);
-                    $window.location.href = '#/fail';
+                    $location.path('#/');
                 }
+                return rejection;
             }
         }
     }

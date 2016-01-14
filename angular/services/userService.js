@@ -6,25 +6,24 @@
         .module('app.services')
         .service('user', userService);
 
-    userService.$inject = ['$http', 'API', 'auth'];
+    userService.$inject = ['$http', 'API'];
 
-    function userService($http, API, auth){
+    function userService($http, API){
         var vm = this;
 
-        vm.getQuote = function(){
-            return $http.get(API + '/auth/quote')
-        };
 
-        vm.register = function(username, password){
-            return $http.post(API +'/auth/register',{
-                username: username,
-                password: password
+        vm.register = function(name, email, password, role){
+            return $http.post(API +'/users',{
+                name: name,
+                email: email,
+                password: password,
+                role: role
             })
         };
 
-        vm.login = function(username, password) {
-            return $http.post(API + '/auth/login', {
-                username: username,
+        vm.login = function(email, password) {
+            return $http.post(API + '/authenticate', {
+                email: email,
                 password: password
             })
         };

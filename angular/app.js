@@ -17,4 +17,5 @@
     angular.module('app.directives', []);
     angular.module('app.constants', []);
     angular.module('app.config', ['ngRoute']);
+
 }());

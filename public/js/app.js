@@ -17,12 +17,16 @@
     angular.module('app.directives', []);
     angular.module('app.constants', []);
     angular.module('app.config', ['ngRoute']);
+
 }());
 
 (function(){
     angular
         .module('app.config')
-        .config(Route);
+        .config(Route)
+        .run(RouteInterceptor);
+
+    RouteInterceptor.$inject = ['$rootScope', '$location', 'auth'];
 
     function Route($routeProvider, $locationProvider){
         $routeProvider
@@ -30,11 +34,31 @@
                 templateUrl: 'public/views/home/home.html',
                 controller: 'HomeController as vm'
             })
-            .when('/fail', {
-                templateUrl: 'public/views/fail/fail.html',
-                controller: 'FailController as vm'
+            .when('/login', {
+                templateUrl: 'public/views/login/login.html',
+                controller: 'LoginController as vm'
             })
+            .when('/register', {
+                templateUrl: 'public/views/register/register.html',
+                controller: 'RegisterController as vm'
+            })
+            .when('/dashboard', {
+                templateUrl: 'public/views/dashboard/dashboard.html',
+                controller: 'DashboardController as vm',
+                requiresLogin: true
+
+            })
+            .otherwise({redirectTo: '/'});
+
     }
+    function RouteInterceptor($rootScope, $location, auth){
+        $rootScope.$on('$routeChangeStart', function(event, next){
+           var authenticated = (auth.isAuthed());
+
+
+        })
+    }
+
 }());
 /**
  * Created by HWhewell on 11/01/2016.
@@ -54,7 +78,7 @@
 (function(){
     angular
         .module('app.constants')
-        .constant('API', 'http://test-routes.herokuapp.com');
+        .constant('API', 'http://localhost:8080/api');
 
 }());
 /**
@@ -65,9 +89,9 @@
         .module('app.factories')
         .factory('authInterceptor', authInterceptor);
 
-    authInterceptor.$inject = ['API', 'auth', '$window'];
+    authInterceptor.$inject = ['API', 'auth', '$location'];
 
-    function authInterceptor(API, auth, $window){
+    function authInterceptor(API, auth, $location){
         return {
             // automatically attach Authorization header
             request: function(config) {
@@ -86,15 +110,15 @@
                 if(res.config.url.indexOf(API) === 0 && res.data.token) {
                     auth.saveToken(res.data.token);
                 }
-
                 return res;
             },
 
             responseError: function(rejection){
-                if(rejection.status === 401){
+                if(rejection.status === 401 || rejection.status === 403){
                     console.log('Response Error 401', rejection);
-                    $window.location.href = '#/fail';
+                    $location.path('#/');
                 }
+                return rejection;
             }
         }
     }
@@ -156,53 +180,77 @@
         .module('app.services')
         .service('user', userService);
 
-    userService.$inject = ['$http', 'API', 'auth'];
+    userService.$inject = ['$http', 'API'];
 
-    function userService($http, API, auth){
+    function userService($http, API){
         var vm = this;
 
-        vm.getQuote = function(){
-            return $http.get(API + '/auth/quote')
-        };
 
-        vm.register = function(username, password){
-            return $http.post(API +'/auth/register',{
-                username: username,
-                password: password
+        vm.register = function(name, email, password, role){
+            return $http.post(API +'/users',{
+                name: name,
+                email: email,
+                password: password,
+                role: role
             })
         };
 
-        vm.login = function(username, password) {
-            return $http.post(API + '/auth/login', {
-                username: username,
+        vm.login = function(email, password) {
+            return $http.post(API + '/authenticate', {
+                email: email,
                 password: password
             })
         };
     }
 }());
 /**
- * Created by HWhewell on 11/01/2016.
+ * Created by HWhewell on 12/01/2016.
  */
 (function(){
     angular
         .module('app.controllers')
-        .controller('FailController', failController);
+        .controller('DashboardController', dashboardController);
 
-    function failController(){
+    dashboardController.$inject = ['auth'];
+
+    function dashboardController(auth){
+        var vm = this;
+
+
+        vm.logout = function(){
+            auth.logout && auth.logout()
+        };
+
+        vm.isAuthed = function() {
+            return auth.isAuthed ? auth.isAuthed() : false
+        }
+
+    }
+}());
+(function(){
+    angular
+        .module('app.controllers')
+        .controller('HomeController', homeController);
+
+
+    function homeController(){
         var vm = this;
 
     }
 }());
 
 
+/**
+ * Created by HWhewell on 12/01/2016.
+ */
 (function(){
     angular
         .module('app.controllers')
-        .controller('HomeController', homeController);
+        .controller('LoginController', loginController);
 
-    homeController.$inject = ['user', 'auth'];
+    loginController.$inject = ['user', '$location'];
 
-    function homeController(user, auth){
+    function loginController(user, $location){
         var vm = this;
 
         function handleRequest(res){
@@ -215,26 +263,37 @@
 
         vm.login = function(){
             user.login(vm.username, vm.password)
-                .then(handleRequest, handleRequest)
-        };
+                .then(handleRequest, handleRequest);
+            $location.path('/dashboard');
 
-        vm.register = function(){
-            user.register(vm.username, vm.password)
-                .then(handleRequest, handleRequest)
         };
-
-        vm.getQuote = function(){
-            user.getQuote()
-                .then(handleRequest, handleRequest)
-        };
-
-        vm.logout = function(){
-            auth.logout && auth.logout()
-        };
-
-        vm.isAuthed = function() {
-            return auth.isAuthed ? auth.isAuthed() : false
-        }
     }
 }());
+/**
+ * Created by HWhewell on 12/01/2016.
+ */
+(function(){
+    angular
+        .module('app.controllers')
+        .controller('RegisterController', registerController);
 
+    registerController.$inject = ['user','$location'];
+
+    function registerController(user, $location){
+        var vm = this;
+
+        function handleRequest(res){
+            var token = res.data ? res.data.token : null;
+            if(token){
+                console.log('JWT:', token);
+            }
+            vm.message = res.data.message;
+        }
+
+        vm.register = function(){
+            user.register(vm.name, vm.email, vm.password, vm.route)
+                .then(handleRequest, handleRequest);
+            $location.path('/dashboard');
+        };
+    }
+}());

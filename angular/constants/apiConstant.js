@@ -4,6 +4,6 @@
 (function(){
     angular
         .module('app.constants')
-        .constant('API', 'http://test-routes.herokuapp.com');
+        .constant('API', 'http://localhost:8080/api');
 
 }());
