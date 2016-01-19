@@ -44,6 +44,7 @@
 
         vm.logout = function() {
             $window.localStorage.removeItem('jwtToken');
+            $location.path('/');
         }
     }
 }());

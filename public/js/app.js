@@ -47,13 +47,22 @@
                 controller: 'DashboardController as vm',
                 requiresLogin: true
 
+
             })
             .otherwise({redirectTo: '/'});
 
     }
     function RouteInterceptor($rootScope, $location, auth){
         $rootScope.$on('$routeChangeStart', function(event, next){
-           var authenticated = (auth.isAuthed());
+            var authenticated = (auth.isAuthed());
+
+            if(next.requiresLogin){
+               if(!authenticated){
+                   event.preventDefault();
+                   $location.path('/');
+               }
+            }
+
 
 
         })
@@ -175,6 +184,7 @@
 
         vm.logout = function() {
             $window.localStorage.removeItem('jwtToken');
+            $location.path('/');
         }
     }
 }());
