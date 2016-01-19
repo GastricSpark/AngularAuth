@@ -65,15 +65,6 @@
  */
 (function(){
     angular
-        .module('app.constants')
-        .constant('API', 'http://localhost:8080/api');
-
-}());
-/**
- * Created by HWhewell on 11/01/2016.
- */
-(function(){
-    angular
         .module('app.config')
         .config(authConfig);
 
@@ -86,6 +77,15 @@
 
         $httpProvider.interceptors.push('authInterceptor');
     }
+}());
+/**
+ * Created by HWhewell on 11/01/2016.
+ */
+(function(){
+    angular
+        .module('app.constants')
+        .constant('API', 'http://localhost:8080/api');
+
 }());
 /**
  * Created by HWhewell on 11/01/2016.
@@ -186,26 +186,47 @@
         .module('app.services')
         .service('user', userService);
 
-    userService.$inject = ['$http', 'API'];
+    userService.$inject = ['$http', 'API', '$location'];
 
-    function userService($http, API){
+    function userService($http, API, $location){
         var vm = this;
 
 
         vm.register = function(name, email, password, role){
-            return $http.post(API +'/user/register',{
-                name: name,
-                email: email,
-                password: password,
-                role: role
-            })
+            return $http({
+                method: 'POST',
+                url: API + '/user/register',
+                data:'name=' + name + '&' + 'email=' +email + '&'
+                + 'password=' +password + '&' + 'role=' + role,
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+            }).then(function successCallback(res){
+                    if(res.data.success == true){
+                        $location.path('/login');
+                    }
+                    else{
+                        window.alert('Could not Register!')
+                    }
+                }
+
+            )
         };
 
         vm.login = function(email, password) {
-            return $http.post(API + '/authenticate', {
-                email: email,
-                password: password
-            })
+            return $http({
+                method: 'POST',
+                url: API + '/authenticate',
+                data: 'email=' +email + '&' + 'password=' +password,
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+            }).then(function successCallback(res){
+                    if(res.data.success == true){
+                        $location.path('/dashboard');
+                    }
+                    else{
+                        window.alert('Wrong Login Credentials!')
+                    }
+                }
+
+            )
         };
     }
 }());
@@ -258,20 +279,8 @@
 
     function loginController(user, $location){
         var vm = this;
-
-        function handleRequest(res){
-            var token = res.data ? res.data.token : null;
-            if(token){
-                console.log('JWT:', token);
-            }
-            vm.success = res.data.success;
-        }
-
         vm.login = function(){
-            user.login(vm.email, vm.password)
-                .then(handleRequest, handleRequest);
-            $location.path('/dashboard');
-
+            user.login(vm.email, vm.password);
         };
 
     }
@@ -289,18 +298,8 @@
     function registerController(user, $location){
         var vm = this;
 
-        function handleRequest(res){
-            var token = res.data ? res.data.token : null;
-            if(token){
-                console.log('JWT:', token);
-            }
-            vm.message = res.data.message;
-        }
-
         vm.register = function(){
-            user.register(vm.name, vm.email, vm.password, vm.route)
-                .then(handleRequest, handleRequest);
-            $location.path('/dashboard');
+            user.register(vm.name, vm.email, vm.password, vm.role);
         };
     }
 }());
