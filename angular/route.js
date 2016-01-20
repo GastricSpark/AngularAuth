@@ -24,16 +24,19 @@
                 templateUrl: 'public/views/dashboard/dashboard.html',
                 controller: 'DashboardController as vm',
                 requiresLogin: true
-
-
+            })
+            .when('/admin', {
+                templateUrl: 'public/views/admin/admin.html',
+                controller: 'AdminController as vm',
+                requiresAdmin: true
             })
             .otherwise({redirectTo: '/'});
 
     }
     function RouteInterceptor($rootScope, $location, auth){
         $rootScope.$on('$routeChangeStart', function(event, next){
-            var authenticated = (auth.isAuthed());
-
+            var authenticated = auth.isAuthed();
+            var admin = auth.isAdmin();
             if(next.requiresLogin){
                if(!authenticated){
                    event.preventDefault();
@@ -41,6 +44,12 @@
                }
             }
 
+            if(next.requiresAdmin){
+                if(!admin){
+                    event.preventDefault();
+                    history.go(-1);
+                }
+            }
 
 
         })

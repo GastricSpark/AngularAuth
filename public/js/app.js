@@ -46,16 +46,19 @@
                 templateUrl: 'public/views/dashboard/dashboard.html',
                 controller: 'DashboardController as vm',
                 requiresLogin: true
-
-
+            })
+            .when('/admin', {
+                templateUrl: 'public/views/admin/admin.html',
+                controller: 'AdminController as vm',
+                requiresAdmin: true
             })
             .otherwise({redirectTo: '/'});
 
     }
     function RouteInterceptor($rootScope, $location, auth){
         $rootScope.$on('$routeChangeStart', function(event, next){
-            var authenticated = (auth.isAuthed());
-
+            var authenticated = auth.isAuthed();
+            var admin = auth.isAdmin();
             if(next.requiresLogin){
                if(!authenticated){
                    event.preventDefault();
@@ -63,6 +66,12 @@
                }
             }
 
+            if(next.requiresAdmin){
+                if(!admin){
+                    event.preventDefault();
+                    history.go(-1);
+                }
+            }
 
 
         })
@@ -146,9 +155,9 @@
         .module('app.services')
         .service('auth', authService);
 
-    authService.$inject = ['$window'];
+    authService.$inject = ['$window','$location'];
 
-    function authService($window){
+    function authService($window, $location){
         var vm = this;
 
         // decode jwt
@@ -181,6 +190,19 @@
                 return false;
             }
         };
+
+        vm.isAdmin = function() {
+            var token = vm.getToken();
+            if(token){
+                var params = vm.parseJwt(token);
+                var role = params.role;
+
+                return role == 'admin';
+
+            } else {
+                return false;
+            }
+        }
 
         vm.logout = function() {
             $window.localStorage.removeItem('jwtToken');
@@ -241,6 +263,19 @@
     }
 }());
 /**
+ * Created by HWhewell on 20/01/2016.
+ */
+
+(function(){
+    angular
+        .module('app.controllers')
+        .controller('AdminController', adminController);
+
+    function adminController(){
+        var vm = this;
+    }
+}());
+/**
  * Created by HWhewell on 12/01/2016.
  */
 (function(){
@@ -260,7 +295,11 @@
 
         vm.isAuthed = function() {
             return auth.isAuthed ? auth.isAuthed() : false
-        }
+        };
+
+        vm.isAdmin = function() {
+            return auth.isAdmin ? auth.isAdmin() : false
+        };
 
     }
 }());

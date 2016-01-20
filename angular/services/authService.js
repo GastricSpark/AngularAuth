@@ -6,9 +6,9 @@
         .module('app.services')
         .service('auth', authService);
 
-    authService.$inject = ['$window'];
+    authService.$inject = ['$window','$location'];
 
-    function authService($window){
+    function authService($window, $location){
         var vm = this;
 
         // decode jwt
@@ -41,6 +41,19 @@
                 return false;
             }
         };
+
+        vm.isAdmin = function() {
+            var token = vm.getToken();
+            if(token){
+                var params = vm.parseJwt(token);
+                var role = params.role;
+
+                return role == 'admin';
+
+            } else {
+                return false;
+            }
+        }
 
         vm.logout = function() {
             $window.localStorage.removeItem('jwtToken');

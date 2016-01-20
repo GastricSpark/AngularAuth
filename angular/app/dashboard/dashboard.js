@@ -18,7 +18,11 @@
 
         vm.isAuthed = function() {
             return auth.isAuthed ? auth.isAuthed() : false
-        }
+        };
+
+        vm.isAdmin = function() {
+            return auth.isAdmin ? auth.isAdmin() : false
+        };
 
     }
 }());
